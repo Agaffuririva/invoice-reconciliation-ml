@@ -1,13 +1,12 @@
-name: CI
+name: Train Model
 
 on:
+  workflow_dispatch:     # permette run manuale
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: [ main ]   # retrain automatico ad ogni push
 
 jobs:
-  ci-tests:
+  train-model:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,8 +24,14 @@ jobs:
           pip install -r requirements.txt
           pip install pytest joblib
 
-      - name: Run tests
+      - name: Run training (data + model)
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          make test
+          make train
+
+      - name: Upload trained model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: invoice-match-model
+          path: models/match_model.pkl
